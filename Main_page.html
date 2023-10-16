@@ -1,0 +1,328 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>109213063 李維 HW2</title>
+    <style>
+        p {
+            font-size: 22px;
+        }
+        .the_title {
+            text-align: center;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+        }
+        .dataTable {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .cen {
+            text-align: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <p class="the_title">待辦事項</p>
+    <div style="display: flex; gap: 10px;" class="buttons">
+        <button style="font-size:18px" type="button" onclick="showfinish()">已完成事項</button>
+        <button style="font-size:18px" type="button" onclick="showInputForm()">新增事項</button>
+        <button style="font-size:18px" type="button" onclick="showUpdateForm()">修改事項</button>
+        <button style="font-size:18px" type="button" onclick="showData()">列出事項</button>
+        <button style="font-size:18px" type="button" onclick="checkFinished()">確認完成</button>
+        <button style="font-size:18px" type="button" onclick="deleteData()">刪除事項</button>
+        <button style="font-size:18px" type="button" onclick="showUnfinish()">未完成事項</button>
+    </div>
+    <div class="cen hidden" id="checkboxSection">
+        <button type="button" onclick="finish()">確認</button>
+        <button type="button" onclick="showData()">取消</button>
+    </div>
+    <div class="dataTable" id="dataSection">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>編號</th>
+                    <th>事項</th>
+                    <th>緊急程度</th>
+                    <th>內容</th>
+                    <th>狀態</th>
+                </tr>
+            </thead>
+            <tbody id="jobTableBody"></tbody>
+        </table>
+    </div>
+    
+    <div class="cen hidden" id="deleteID"> 
+        事項編號: <input id="chooseID2" type="text" /><br>
+        <button type="button" onclick="deleteTask()">確認</button>
+        <button type="button" onclick="showData()">取消</button>
+    </div>
+    
+    <div class="cen hidden" id="finishID"> 
+        事項編號: <input id="chooseID" type="text" /><br>
+        <button type="button" onclick="finishTask()">確認</button>
+        <button type="button" onclick="showData()">取消</button>
+    </div>
+    <div class="cen hidden" id="cenection">
+        <form id="inputForm">
+            
+            <div class="cen" id="jobIDWrapper">
+                事項編號: <input id="jobID" type="text" /><br>
+            </div>
+            
+            工作名稱: <input id="jobName" type="text" /><br>
+            緊急程度: <input id="jobUrgent" type="text" /><br>
+            工作說明: <textarea id='jobContent'></textarea><br>
+            
+            <div class="cen" id="save">
+                <button type="button" onclick="saveData()">新增</button>
+                <button type="button" onclick="showData()">取消</button>
+            </div>
+            
+            <div class="cen" id="update">
+                <button type="button" onclick="updateData()">更新</button>
+                <button type="button" onclick="showData()">取消</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+<script language="javascript">
+
+    // 這邊的function主要為UI顯示邏輯，非功能的將其隱藏
+    // .classList.add('hidden')為隱藏 .classList.remove('hidden')為解除隱藏
+    
+    // 顯示已完成事項
+    function showfinish() { 
+        document.getElementById('dataSection').classList.remove('hidden');
+        document.getElementById('cenection').classList.add('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+        finishData(); // 實際運作的function
+    }
+    
+    // 顯示新增事項
+    function showInputForm() { //
+        document.getElementById('dataSection').classList.add('hidden');
+        document.getElementById('cenection').classList.remove('hidden');
+        document.getElementById('jobIDWrapper').classList.add('hidden');
+        document.getElementById('update').classList.add('hidden');
+        document.getElementById('save').classList.remove('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+    }
+    
+    // 顯示修改事項
+    function showUpdateForm() {
+        document.getElementById('dataSection').classList.add('hidden');
+        document.getElementById('cenection').classList.remove('hidden');
+        document.getElementById('jobIDWrapper').classList.remove('hidden');
+        document.getElementById('update').classList.remove('hidden');
+        document.getElementById('save').classList.add('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+    }
+    
+    //顯示所有事項
+    function showData() {
+        document.getElementById('dataSection').classList.remove('hidden');
+        document.getElementById('cenection').classList.add('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+        loadData();
+    }
+    
+    // 顯示確認完成事項id輸入欄位
+    function checkFinished() {
+        document.getElementById('dataSection').classList.add('hidden');
+        document.getElementById('cenection').classList.add('hidden');
+        document.getElementById('update').classList.add('hidden');
+        document.getElementById('save').classList.add('hidden');
+        document.getElementById('finishID').classList.remove('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+    }
+    
+    // 顯示欲刪除事項id輸入欄位
+    function deleteData() {
+        document.getElementById('dataSection').classList.add('hidden');
+        document.getElementById('cenection').classList.add('hidden');
+        document.getElementById('update').classList.add('hidden');
+        document.getElementById('save').classList.add('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.remove('hidden');
+    }
+    
+    // 顯示未完成事項
+    function showUnfinish() {
+        document.getElementById('dataSection').classList.remove('hidden');
+        document.getElementById('cenection').classList.add('hidden');
+        document.getElementById('finishID').classList.add('hidden');
+        document.getElementById('deleteID').classList.add('hidden');
+        unFinishData();
+    }
+    
+    // 接下來皆為實際運作的function
+    
+    // 顯示已完成事項
+    function finishData() {
+        var URL = 'j.php'; 
+        fetch(URL, {
+            method: 'GET'
+        })
+        .then(function(res) {
+            return res.json();
+        })
+        .then(function(data) {
+            // 清空現有表格內容
+            var tableBody = document.getElementById('jobTableBody');
+            tableBody.innerHTML = '';
+
+            // 循環遍歷數據並填充表格
+            data.forEach(function(row) {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                <td>${row['id']}</td>
+                <td>${row['jobName']}</td>
+                <td>${row['jobUrgent']}</td>
+                <td>${row['jobContent']}</td>
+                <td>${row['status']}</td>`;
+                tableBody.appendChild(newRow);
+            });
+        });
+    }
+     
+    // 顯示新增事項
+    function saveData() {
+        var jobName = document.getElementById('jobName').value;
+        var jobUrgent = document.getElementById('jobUrgent').value;
+        var jobContent = document.getElementById('jobContent').value;
+        
+        var formData = new FormData(document.getElementById('inputForm'));
+        formData.append('jobName', jobName);
+        formData.append('jobUrgent', jobUrgent);
+        formData.append('jobContent', jobContent);
+        
+
+        URL = 'e.php'; 
+        fetch(URL, {
+            method: 'POST',
+            body: formData
+        })
+        clearForm();
+    }
+    
+    // 顯示修改事項
+    function updateData() {
+        var jobName = document.getElementById('jobName').value;
+        var jobUrgent = document.getElementById('jobUrgent').value;
+        var jobContent = document.getElementById('jobContent').value;
+        var jobID = document.getElementById('jobID').value;
+
+        var formData = new FormData();
+        formData.append('jobName', jobName);
+        formData.append('jobUrgent', jobUrgent);
+        formData.append('jobContent', jobContent);
+        formData.append('jobID', jobID);
+
+        URL = 'g.php'; 
+        fetch(URL, {
+            method: 'POST',
+            body: formData
+        })
+        clearForm();
+        document.getElementById('jobID').value = '';
+    }
+    
+    // 顯示所有事項
+    function loadData() {
+        var URL = 'f.php'; 
+        fetch(URL, {
+            method: 'GET'
+        })
+        .then(function(res) {
+            return res.json();
+        })
+        .then(function(data) {
+            // 清空表格內容
+            var tableBody = document.getElementById('jobTableBody');
+            tableBody.innerHTML = '';
+
+            // 循環遍歷數據並填充表格
+            data.forEach(function(row) {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                <td>${row['id']}</td>
+                <td>${row['jobName']}</td>
+                <td>${row['jobUrgent']}</td>
+                <td>${row['jobContent']}</td>
+                <td>${row['status']}</td>`;
+                tableBody.appendChild(newRow);
+            });
+        });
+    }
+    
+    // 顯示確認完成事項id輸入欄位
+    function finishTask() {
+        var id = document.getElementById('chooseID').value;
+        URL='h.php?id=' + id; 
+        
+        fetch(URL,{
+            method: 'GET'
+        })
+        document.getElementById('chooseID').value = '';
+    }
+    
+    // 顯示欲刪除事項id輸入欄位
+    function deleteTask() {
+        var id = document.getElementById('chooseID2').value;
+        URL='i.php?id=' + id; 
+        fetch(URL,{
+            method: 'GET'
+        })
+        document.getElementById('chooseID2').value = '';
+    }
+    
+    // 顯示未完成事項
+    function unFinishData() {
+        var URL = 'k.php'; 
+        fetch(URL, {
+            method: 'GET'
+        })
+        .then(function(res) {
+            return res.json();
+        })
+        .then(function(data) {
+            // 清空現有表格內容
+            var tableBody = document.getElementById('jobTableBody');
+            tableBody.innerHTML = '';
+
+            // 循環遍歷數據並填充表格
+            data.forEach(function(row) {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                <td>${row['id']}</td>
+                <td>${row['jobName']}</td>
+                <td>${row['jobUrgent']}</td>
+                <td>${row['jobContent']}</td>
+                <td>${row['status']}</td>`;
+                tableBody.appendChild(newRow);
+            });
+        });
+    }
+    
+    // 在輸入完新增、更新後清空表格的function
+    function clearForm() {
+        document.getElementById('jobName').value = ''; 
+        document.getElementById('jobUrgent').value = ''; 
+        document.getElementById('jobContent').value = ''; 
+    }
+
+</script>
+
+</html>
